@@ -4,7 +4,8 @@
 # 设置变量
 USERNAME="wstier477"  # 替换为您的PythonAnywhere用户名
 PROJECT_NAME="zwky_api"
-GITHUB_REPO="https://github.com/wstier477/AAAzwky.git"  # 如果使用GitHub，请替换为您的仓库URL
+GITHUB_REPO="https://github.com/wstier477/AAAzwky.git"  # GitHub仓库URL
+GITHUB_PROJECT_DIR="AAAzwky"  # GitHub上的项目目录名
 
 echo "开始部署 $PROJECT_NAME 到 PythonAnywhere..."
 
@@ -25,13 +26,19 @@ ssh $USERNAME@ssh.pythonanywhere.com << EOF
       # 如果不使用Git，则备份并重新克隆
       cd ..
       mv $PROJECT_NAME ${PROJECT_NAME}_backup_\$(date +%Y%m%d_%H%M%S)
-      git clone $GITHUB_REPO $PROJECT_NAME
+      git clone $GITHUB_REPO $GITHUB_PROJECT_DIR
+      # 将zwky_api目录从克隆的仓库中移动出来
+      mv $GITHUB_PROJECT_DIR/zwky_api .
+      rm -rf $GITHUB_PROJECT_DIR
       cd $PROJECT_NAME
     fi
   else
     echo "创建新项目目录并克隆代码..."
-    # 如果使用Git
-    git clone $GITHUB_REPO $PROJECT_NAME
+    # 克隆GitHub仓库
+    git clone $GITHUB_REPO $GITHUB_PROJECT_DIR
+    # 将zwky_api目录从克隆的仓库中移动出来
+    mv $GITHUB_PROJECT_DIR/zwky_api .
+    rm -rf $GITHUB_PROJECT_DIR
     cd $PROJECT_NAME
   fi
 

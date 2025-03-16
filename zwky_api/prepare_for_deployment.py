@@ -9,6 +9,7 @@ import sys
 import subprocess
 import importlib.util
 from pathlib import Path
+import re
 
 def check_python_version():
     """检查Python版本"""
@@ -55,6 +56,14 @@ def check_django_settings():
         print("错误: pythonanywhere_settings.py文件不存在")
         return False
     
+    # 检查域名设置
+    with open(settings_file, "r", encoding="utf-8") as f:
+        content = f.read()
+        if "wstier477.pythonanywhere.com" not in content:
+            print("警告: pythonanywhere_settings.py中的ALLOWED_HOSTS可能未正确设置")
+            print("请确保包含'wstier477.pythonanywhere.com'")
+            return False
+    
     print("Django设置文件检查通过")
     return True
 
@@ -65,6 +74,14 @@ def check_wsgi_file():
     if not wsgi_file.exists():
         print("错误: pythonanywhere_wsgi.py文件不存在")
         return False
+    
+    # 检查路径设置
+    with open(wsgi_file, "r", encoding="utf-8") as f:
+        content = f.read()
+        if "/home/wstier477/zwky_api" not in content:
+            print("警告: pythonanywhere_wsgi.py中的路径可能未正确设置")
+            print("请确保路径设置为'/home/wstier477/zwky_api'")
+            return False
     
     print("WSGI文件检查通过")
     return True
@@ -86,6 +103,18 @@ def check_deploy_script():
     if not deploy_script.exists():
         print("错误: deploy_to_pythonanywhere.sh文件不存在")
         return False
+    
+    # 检查用户名和仓库设置
+    with open(deploy_script, "r", encoding="utf-8") as f:
+        content = f.read()
+        if "USERNAME=\"wstier477\"" not in content:
+            print("警告: deploy_to_pythonanywhere.sh中的用户名可能未正确设置")
+            print("请确保USERNAME设置为'wstier477'")
+            return False
+        if "https://github.com/wstier477/AAAzwky.git" not in content:
+            print("警告: deploy_to_pythonanywhere.sh中的GitHub仓库URL可能未正确设置")
+            print("请确保GITHUB_REPO设置为'https://github.com/wstier477/AAAzwky.git'")
+            return False
     
     print("部署脚本检查通过")
     return True
@@ -115,6 +144,26 @@ def check_git_repo():
         print("注意: Git未安装或不在PATH中，跳过Git检查")
         return True
 
+def check_pythonanywhere_specific():
+    """检查PythonAnywhere特定的配置"""
+    print("检查PythonAnywhere特定配置...")
+    
+    # 检查README_DEPLOY.md是否存在
+    readme_file = Path("README_DEPLOY.md")
+    if not readme_file.exists():
+        print("警告: README_DEPLOY.md文件不存在，部署指南可能不完整")
+        return False
+    
+    # 检查README中的域名和用户名
+    with open(readme_file, "r", encoding="utf-8") as f:
+        content = f.read()
+        if "wstier477.pythonanywhere.com" not in content:
+            print("警告: README_DEPLOY.md中可能未包含正确的域名")
+            return False
+    
+    print("PythonAnywhere特定配置检查通过")
+    return True
+
 def main():
     """主函数"""
     print("开始部署前检查...\n")
@@ -126,7 +175,8 @@ def main():
         check_wsgi_file,
         check_static_directory,
         check_deploy_script,
-        check_git_repo
+        check_git_repo,
+        check_pythonanywhere_specific
     ]
     
     results = [check() for check in checks]
@@ -134,6 +184,7 @@ def main():
     print("\n检查结果摘要:")
     if all(results):
         print("✅ 所有检查通过！项目已准备好部署到PythonAnywhere。")
+        print("您可以运行 'bash deploy_to_pythonanywhere.sh' 开始部署过程。")
     else:
         print("❌ 部分检查未通过。请修复上述问题后再尝试部署。")
     

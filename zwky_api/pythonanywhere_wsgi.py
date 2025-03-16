@@ -11,7 +11,7 @@ path = '/home/wstier477/zwky_api'
 if path not in sys.path:
     sys.path.append(path)
 
-# 设置Django设置模块
+# 设置Django设置模块  
 os.environ['DJANGO_SETTINGS_MODULE'] = 'zwky_api.pythonanywhere_settings'
 
 # 导入Django的WSGI应用
